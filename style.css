@@ -1,0 +1,97 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --main-color: #ffd924;
+}
+
+@font-face {
+    font-family: 'pokemon_hollownormal';
+    src: url('public/fonts/pokemonhollow-webfont.woff') format('woff2'),
+         url('public/fonts/pokemonhollow-webfont.woff2') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+
+@font-face {
+    font-family: 'pokemon_solidnormal';
+    src: url('public/fonts/pokemonsolid-webfont.woff') format('woff2'),
+         url('public/fonts/pokemonsolid-webfont.woff2') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+body {
+    font-family: 'pokemon_hollownormal';
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    gap: 3vh;
+}
+
+.searcher {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 3vh;
+}
+
+.searcher__title {
+    font-family: 'pokemon_solidnormal';
+    font-size: 5rem;
+    color: var(--main-color);
+    -webkit-text-stroke: 1px black;
+    margin-top: 5vh;
+    letter-spacing: 0.2rem;
+}
+
+.searcher__input {
+    width: 20%;
+    padding: 1rem;
+    outline: none;
+    border: 0.2rem solid var(--main-color);
+    border-radius: 3rem;
+    text-decoration: none;
+    font-size: 2rem;
+    color: var(--main-color);
+}
+
+.searcher__input::placeholder {
+    color: var(--main-color);
+}
+
+.pokemon {
+    width: 100%;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 3rem;
+}
+
+.pokemon__img {
+    width: 200px;
+}
+
+.pokemon__container {
+    display: flex;
+    align-items: center;
+}
+
+.pokemon__name {
+    font-size: 5rem;
+}
+
+.pokemon__info {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 4rem;
+}
