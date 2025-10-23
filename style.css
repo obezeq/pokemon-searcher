@@ -27,7 +27,7 @@
 }
 
 body {
-    font-family: 'pokemon_hollownormal';
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .main {
@@ -85,13 +85,15 @@ body {
 .pokemon__container {
     display: flex;
     align-items: center;
+    gap: 3rem;
 }
 
 .pokemon__name {
     font-size: 5rem;
+    font-weight: bold;
 }
 
 .pokemon__info {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 4rem;
+    font-size: 3rem;
 }

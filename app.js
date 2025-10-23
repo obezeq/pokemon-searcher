@@ -1,15 +1,52 @@
-const capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + string.slice(1); 
+'use strict'
 
-const fetchPokemonData = (nombrePokemon) => {
-    const data = fetch(`https://pokeapi.co/api/v2/pokemon/${nombrePokemon}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Pokémon no encontrado');
+const capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + string.slice(1);
+
+var pokemons;
+
+const fetchData = async (endpoint, customError = '') => {
+    
+    try {
+
+        const response = await fetch(endpoint)
+        if (!response.ok) {
+            if (customError)  {
+                throw new Error('No se ha podido encontrar la lista de pokemons');   
+            } else {
+                throw new Error('ERROR al hacer obtener los resultados de ' + endpoint)
             }
-            return response.json();
-        });
+        }
 
-    return data
+        const responseJson = await response.json();
+        return responseJson;
+
+    } catch (error) {
+        return error;
+    }
+}
+
+const fetchPokemons = async () => {
+    const data = await fetchData('https://pokeapi.co/api/v2/pokemon/?limit=100000');
+    const results = data["results"];
+    return results;
+}
+
+const fetchPokemonData = async (pokemonId) => {
+    const data = await fetchData(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`)
+    return data;
+}
+
+const getPokemonsData = async () => {
+    const results = await fetchPokemons();
+
+    const pokemonsFull = await Promise.all(results.map(async pokemon => {
+        const pokemonName = (pokemon.name).replaceAll('-', ' ');
+        const pokemonId = (pokemon.url).split('/v2/pokemon/')[1].split('/')[0];
+        const pokemonData = await fetchPokemonData(pokemonId);
+        return { 'name': pokemonName, 'data': pokemonData };
+    }));
+    
+    pokemons = pokemonsFull;
 }
 
 const apiSearch = (nombrePokemon) => {
@@ -17,7 +54,7 @@ const apiSearch = (nombrePokemon) => {
         .then(displayPokemonData)
         .catch(error => {
             console.error('Error al obtener el Pokémon:', error.message);
-        })
+    });
 }
 
 const updateDOM = (data, dataPokemonName, dataPokemonHeight, dataPokemonWeight, dataPokemonTipos) => {
@@ -25,11 +62,14 @@ const updateDOM = (data, dataPokemonName, dataPokemonHeight, dataPokemonWeight, 
     pokemonSection.style.display = 'flex';
 
     const img = document.getElementById('pokemonImg');
-    img.src = data.sprites.front_default;
-    img.alt = `Imagen de ${data.name}`;
+    const frontDefaultSprite = data.sprites.front_default;
+    if (frontDefaultSprite) {
+        img.src = frontDefaultSprite;
+        img.alt = `Imagen de ${data.name}`;
+    }
 
     const pokemonName = document.getElementById('pokemonName');
-    pokemonName.textContent = dataPokemonName;
+    pokemonName.textContent = dataPokemonName.replaceAll("-", " ");
 
     const pokemonAltura = document.getElementById('pokemonAltura');
     pokemonAltura.textContent = `Altura: ${dataPokemonHeight}`;
@@ -47,31 +87,40 @@ const displayPokemonData = (data) => {
     const dataPokemonWeight = data.weight;
     const dataPokemonTipos = data.types.map(tipoInfo => tipoInfo.type.name).join(', ');
 
-    console.log('Nombre:', dataPokemonName);
-    console.log('Altura:', dataPokemonHeight);
-    console.log('Peso:', dataPokemonWeight);
-    console.log('Tipos:', dataPokemonTipos);
+    console.log('- Nombre:', dataPokemonName);
+    console.log('- Altura:', dataPokemonHeight);
+    console.log('- Peso:', dataPokemonWeight);
+    console.log('- Tipos:', dataPokemonTipos);
 
     updateDOM(data, dataPokemonName, dataPokemonHeight, dataPokemonWeight, dataPokemonTipos);
 
 }
 
-const inputHandler = () => {
-    const input = document.getElementById('placeholder__input')
+const searchMatches = (pokemonSearch) => {
+    const matches = pokemons.filter(pokemon => 
+        pokemon.name.toLowerCase().includes(pokemonSearch.toLowerCase())
+    );
 
-    input.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-
-            const nombrePokemon = input.value.trim().toLowerCase();
-            if (nombrePokemon) {
-                apiSearch(nombrePokemon);
-                input.value = '';
-            }
-        }
-    })
+    return matches;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    inputHandler();
+const inputHandler = async () => {
+    const input = document.getElementById('placeholder__input')
+
+    input.addEventListener('keyup', (event) => {
+        event.preventDefault();
+
+        const pokemonSearch = input.value.trim().toLowerCase();
+        const matches = searchMatches(pokemonSearch);
+        
+        matches.forEach(pokemon => {
+            displayPokemonData(pokemon["data"])
+        });
+    });
+
+}
+
+document.addEventListener('DOMContentLoaded', async() => {
+    await getPokemonsData();
+    await inputHandler();
 });
